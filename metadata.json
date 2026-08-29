@@ -1,0 +1,6 @@
+{
+  "name": "লাইফসেভার ব্লাড ব্যাংক",
+  "description": "প্রিমিয়াম Google Apps Script ও Google Sheets ডাটাবেজ চালিত রক্তদান ম্যানেজমেন্ট সিস্টেম ও অ্যাডমিন ড্যাশবোর্ড।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
