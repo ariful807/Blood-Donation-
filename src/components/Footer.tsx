@@ -2,6 +2,7 @@ import React from 'react';
 import { Droplet, Heart, Phone, Mail, MapPin, Database, ShieldCheck, ExternalLink } from 'lucide-react';
 import { SiteConfig } from '../types';
 import { storageService } from '../services/storageService';
+import { formatDriveImageUrl } from '../utils/imageUtils';
 
 interface FooterProps {
   setCurrentPage: (page: string) => void;
@@ -57,7 +58,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentPage, onOpenEmergencyM
             <div className="flex items-center space-x-3">
               {config.logoUrl ? (
                 <img 
-                  src={config.logoUrl} 
+                  src={formatDriveImageUrl(config.logoUrl)} 
                   alt={config.siteName} 
                   className="w-10 h-10 rounded-xl object-contain bg-white/10 p-1 border border-amber-400/40"
                   referrerPolicy="no-referrer"

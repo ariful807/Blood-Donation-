@@ -13,6 +13,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { User, SiteConfig } from '../types';
+import { formatDriveImageUrl } from '../utils/imageUtils';
 
 interface NavbarProps {
   currentPage: string;
@@ -62,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             {logoUrl ? (
               <img 
-                src={logoUrl} 
+                src={formatDriveImageUrl(logoUrl)} 
                 alt={siteName} 
                 className="w-12 h-12 rounded-2xl object-cover shadow-md border border-stone-200 group-hover:scale-105 transition-transform duration-300"
                 referrerPolicy="no-referrer"

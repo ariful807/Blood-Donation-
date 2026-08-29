@@ -22,11 +22,13 @@ import { storageService } from '../../services/storageService';
 interface NoticePageProps {
   siteConfig?: SiteConfig;
   onOpenEmergencyModal?: () => void;
+  setCurrentPage?: (page: string) => void;
 }
 
 export const NoticePage: React.FC<NoticePageProps> = ({
   siteConfig,
-  onOpenEmergencyModal
+  onOpenEmergencyModal,
+  setCurrentPage
 }) => {
   const [notices, setNotices] = useState<NoticeItem[]>(() => storageService.getNotices());
   const [searchQuery, setSearchQuery] = useState('');

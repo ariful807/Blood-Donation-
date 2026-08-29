@@ -725,7 +725,27 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         </div>
       )}
 
-      {/* 2. DONORS MANAGEMENT TAB */}
+      {/* 2. SITE & SECTION CUSTOMIZER TAB */}
+      {activeTab === 'site_customizer' && (
+        <SiteCustomizerTab onUpdated={onUpdateSiteConfig} />
+      )}
+
+      {/* 3. HOME SLIDERS MANAGER TAB */}
+      {activeTab === 'sliders' && (
+        <SlidersManagerTab onUpdated={onRefresh} />
+      )}
+
+      {/* 4. NOTICES MANAGER TAB */}
+      {activeTab === 'notices' && (
+        <NoticesManagerTab onUpdated={onRefresh} />
+      )}
+
+      {/* 5. ARTICLES & VIDEO MANAGER TAB */}
+      {activeTab === 'articles' && (
+        <ArticlesManagerTab onUpdated={onRefresh} />
+      )}
+
+      {/* 6. DONORS MANAGEMENT TAB */}
       {activeTab === 'donors' && (
         <div className="bg-white rounded-3xl p-6 border border-stone-200 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-stone-100 pb-4">

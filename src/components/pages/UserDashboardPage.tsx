@@ -619,12 +619,27 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({
               />
             </div>
 
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-[#B71C1C] hover:bg-[#8B0000] text-white rounded-xl font-bold text-xs transition-colors shadow-xs"
-            >
-              পরিবর্তনগুলো সংরক্ষণ করুন
-            </button>
+            <div className="flex items-center justify-between pt-4 border-t border-stone-200">
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-[#B71C1C] hover:bg-[#8B0000] text-white rounded-xl font-bold text-xs transition-colors shadow-xs cursor-pointer"
+              >
+                পরিবর্তনগুলো সংরক্ষণ করুন
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm('আপনি কি নিশ্চিত যে আপনার ডোনার প্রোফাইল ও সকল তথ্য সম্পূর্ণ মুছে ফেলতে চান? এটি অপরিবর্তনযোগ্য।')) {
+                    storageService.deleteUser(currentUser.id);
+                    onLogout();
+                  }
+                }}
+                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl font-bold text-xs transition-colors cursor-pointer"
+              >
+                প্রোফাইল তথ্য মুছে ফেলুন
+              </button>
+            </div>
           </form>
         </div>
       )}

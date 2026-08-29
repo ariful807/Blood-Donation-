@@ -560,6 +560,12 @@ class StorageService {
     return this.updateSiteConfig(config);
   }
 
+  resetSiteConfig(): SiteConfig {
+    this.setItem(STORAGE_KEYS.SITE_CONFIG, INITIAL_SITE_CONFIG);
+    this.logActivity('ADMIN', 'অ্যাডমিন', 'ওয়েবসাইট কনফিগারেশন ডিফল্ট অবস্থায় রিসেট করা হয়েছে', '', 'warning');
+    return { ...INITIAL_SITE_CONFIG };
+  }
+
   // --- Notices (নোটিস বোর্ড ব্যবস্থাপনা) ---
   getNotices(): NoticeItem[] {
     return this.getItem<NoticeItem[]>(STORAGE_KEYS.NOTICES, INITIAL_NOTICES);
@@ -574,6 +580,13 @@ class StorageService {
     const newNotice: NoticeItem = {
       ...notice,
       id: 'NOT-' + (100 + notices.length + 1),
+      date: notice.date || notice.publishDate || new Date().toISOString().split('T')[0],
+      publishDate: notice.publishDate || notice.date || new Date().toISOString().split('T')[0],
+      externalUrl: notice.externalUrl || notice.actionUrl,
+      externalUrlText: notice.externalUrlText || notice.actionText,
+      actionUrl: notice.actionUrl || notice.externalUrl,
+      actionText: notice.actionText || notice.externalUrlText,
+      publishedBy: notice.publishedBy || 'এডমিন',
       attachmentUrl: notice.attachmentUrl ? formatDriveImageUrl(notice.attachmentUrl) : undefined,
       createdAt: new Date().toISOString()
     };
@@ -590,6 +603,18 @@ class StorageService {
 
     if (updates.attachmentUrl) {
       updates.attachmentUrl = formatDriveImageUrl(updates.attachmentUrl);
+    }
+    if (updates.publishDate && !updates.date) {
+      updates.date = updates.publishDate;
+    }
+    if (updates.date && !updates.publishDate) {
+      updates.publishDate = updates.date;
+    }
+    if (updates.actionUrl && !updates.externalUrl) {
+      updates.externalUrl = updates.actionUrl;
+    }
+    if (updates.actionText && !updates.externalUrlText) {
+      updates.externalUrlText = updates.actionText;
     }
 
     notices[index] = { ...notices[index], ...updates };
@@ -630,10 +655,17 @@ class StorageService {
 
   addArticle(article: Omit<ArticleItem, 'id' | 'createdAt' | 'viewsCount'>): ArticleItem {
     const articles = this.getArticles();
+    const rawImage = article.coverImageUrl || article.imageUrl;
+    const formattedImg = rawImage ? formatDriveImageUrl(rawImage) : undefined;
     const newArticle: ArticleItem = {
       ...article,
       id: 'ART-' + (100 + articles.length + 1),
-      imageUrl: article.imageUrl ? formatDriveImageUrl(article.imageUrl) : undefined,
+      imageUrl: formattedImg,
+      coverImageUrl: formattedImg,
+      author: article.author || article.authorName || 'এডমিন',
+      authorName: article.authorName || article.author || 'এডমিন',
+      date: article.date || article.publishedDate || new Date().toISOString().split('T')[0],
+      publishedDate: article.publishedDate || article.date || new Date().toISOString().split('T')[0],
       viewsCount: 1,
       createdAt: new Date().toISOString()
     };
@@ -648,8 +680,25 @@ class StorageService {
     const index = articles.findIndex(a => a.id === id);
     if (index === -1) return null;
 
-    if (updates.imageUrl) {
+    if (updates.coverImageUrl) {
+      updates.coverImageUrl = formatDriveImageUrl(updates.coverImageUrl);
+      updates.imageUrl = updates.coverImageUrl;
+    } else if (updates.imageUrl) {
       updates.imageUrl = formatDriveImageUrl(updates.imageUrl);
+      updates.coverImageUrl = updates.imageUrl;
+    }
+
+    if (updates.authorName && !updates.author) {
+      updates.author = updates.authorName;
+    }
+    if (updates.author && !updates.authorName) {
+      updates.authorName = updates.author;
+    }
+    if (updates.publishedDate && !updates.date) {
+      updates.date = updates.publishedDate;
+    }
+    if (updates.date && !updates.publishedDate) {
+      updates.publishedDate = updates.date;
     }
 
     articles[index] = { ...articles[index], ...updates };
@@ -692,7 +741,13 @@ class StorageService {
     const newSlider: HomeSliderItem = {
       ...slider,
       id: 'SLIDE-' + (sliders.length + 1),
-      imageUrl: formatDriveImageUrl(slider.imageUrl)
+      imageUrl: formatDriveImageUrl(slider.imageUrl),
+      badge: slider.badge || slider.badgeText,
+      badgeText: slider.badgeText || slider.badge,
+      linkPage: slider.linkPage || slider.buttonLink,
+      buttonLink: slider.buttonLink || slider.linkPage,
+      linkText: slider.linkText || slider.buttonText,
+      buttonText: slider.buttonText || slider.linkText
     };
     sliders.push(newSlider);
     this.saveSliders(sliders);
@@ -707,6 +762,24 @@ class StorageService {
 
     if (updates.imageUrl) {
       updates.imageUrl = formatDriveImageUrl(updates.imageUrl);
+    }
+    if (updates.badgeText && !updates.badge) {
+      updates.badge = updates.badgeText;
+    }
+    if (updates.badge && !updates.badgeText) {
+      updates.badgeText = updates.badge;
+    }
+    if (updates.buttonLink && !updates.linkPage) {
+      updates.linkPage = updates.buttonLink;
+    }
+    if (updates.linkPage && !updates.buttonLink) {
+      updates.buttonLink = updates.linkPage;
+    }
+    if (updates.buttonText && !updates.linkText) {
+      updates.linkText = updates.buttonText;
+    }
+    if (updates.linkText && !updates.buttonText) {
+      updates.buttonText = updates.linkText;
     }
 
     sliders[index] = { ...sliders[index], ...updates };

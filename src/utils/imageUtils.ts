@@ -22,18 +22,18 @@ export function formatDriveImageUrl(input: string | undefined | null): string {
   const trimmed = input.trim();
   if (!trimmed) return '';
 
-  // Already lh3 format
+  // Already in lh3.googleusercontent.com/d/ format
   if (trimmed.startsWith('https://lh3.googleusercontent.com/d/')) {
     return trimmed;
   }
 
-  // Google Drive file/d/ID pattern
+  // Google Drive file/d/ID pattern (e.g., https://drive.google.com/file/d/1XYZ.../view?usp=sharing)
   const fileDMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (fileDMatch && fileDMatch[1]) {
     return `https://lh3.googleusercontent.com/d/${fileDMatch[1]}`;
   }
 
-  // Google Drive ?id=ID or &id=ID pattern
+  // Google Drive ?id=ID or &id=ID pattern (e.g., https://drive.google.com/open?id=1XYZ..., https://drive.google.com/uc?id=1XYZ...)
   const idParamMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (idParamMatch && idParamMatch[1]) {
     return `https://lh3.googleusercontent.com/d/${idParamMatch[1]}`;
@@ -45,8 +45,14 @@ export function formatDriveImageUrl(input: string | undefined | null): string {
     return `https://lh3.googleusercontent.com/d/${dPathMatch[1]}`;
   }
 
-  // Raw Google Drive ID (typically 25 to 45 alphanumeric characters with underscores/dashes)
-  if (/^[a-zA-Z0-9_-]{25,45}$/.test(trimmed)) {
+  // Google Drive drive.google.com/folderview?id=ID
+  const folderMatch = trimmed.match(/folderview\?id=([a-zA-Z0-9_-]+)/);
+  if (folderMatch && folderMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${folderMatch[1]}`;
+  }
+
+  // Raw Google Drive File ID (alphanumeric 20-50 chars containing letters and numbers)
+  if (/^[a-zA-Z0-9_-]{20,50}$/.test(trimmed) && !trimmed.startsWith('http') && !trimmed.includes('.')) {
     return `https://lh3.googleusercontent.com/d/${trimmed}`;
   }
 

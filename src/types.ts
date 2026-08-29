@@ -158,68 +158,82 @@ export interface ApplicationSectionConfig {
 
 export interface SiteConfig {
   siteName: string;
-  siteNameEn: string;
+  siteNameEn?: string;
   siteSlogan: string;
   logoUrl?: string;
-  emergencyPhone: string;
-  emergencyPhoneAlt: string;
-  emergencyEmail: string;
-  officeAddress: string;
+  emergencyPhone?: string;
+  emergencyPhoneAlt?: string;
+  emergencyEmail?: string;
+  officeAddress?: string;
+  contactPhone?: string;
+  contactEmail?: string;
   // Hero section
-  heroBadge: string;
-  heroTitle: string;
-  heroSubtitle: string;
+  heroBadge?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
   // Section Titles & Subtitles
-  statsSectionTitle: string;
-  urgentRequestsTitle: string;
-  urgentRequestsSubtitle: string;
-  bloodStockTitle: string;
-  bloodStockSubtitle: string;
-  donorsDirectoryTitle: string;
-  donorsDirectorySubtitle: string;
-  aboutSectionTitle: string;
-  aboutSectionSubtitle: string;
-  aboutStoryText: string;
-  gallerySectionTitle: string;
-  gallerySectionSubtitle: string;
-  applySectionTitle: string;
-  applySectionSubtitle: string;
-  contactSectionTitle: string;
-  contactSectionSubtitle: string;
-  footerText: string;
-  copyrightText: string;
+  statsSectionTitle?: string;
+  urgentRequestsTitle?: string;
+  urgentRequestsSubtitle?: string;
+  bloodStockTitle?: string;
+  bloodStockSubtitle?: string;
+  donorsDirectoryTitle?: string;
+  donorsDirectorySubtitle?: string;
+  donorsSectionTitle?: string;
+  donorsSectionSubtitle?: string;
+  noticeSectionTitle?: string;
+  noticeSectionSubtitle?: string;
+  blogSectionTitle?: string;
+  blogSectionSubtitle?: string;
+  aboutSectionTitle?: string;
+  aboutSectionSubtitle?: string;
+  aboutStoryText?: string;
+  gallerySectionTitle?: string;
+  gallerySectionSubtitle?: string;
+  applySectionTitle?: string;
+  applySectionSubtitle?: string;
+  contactSectionTitle?: string;
+  contactSectionSubtitle?: string;
+  footerText?: string;
+  copyrightText?: string;
 }
 
 export interface NoticeItem {
   id: string;
   title: string;
-  category: 'urgent' | 'general' | 'camp' | 'official';
+  category: 'urgent' | 'general' | 'camp' | 'official' | string;
   categoryLabel?: string;
   content: string;
-  date: string;
-  publishedBy: string;
+  date?: string;
+  publishDate?: string;
+  publishedBy?: string;
   isPinned: boolean;
   externalUrl?: string; // ঐচ্ছিক লিংক
   externalUrlText?: string; // বাটনের লেবেল যেমন 'বিস্তারিত দেখুন'
+  actionUrl?: string;
+  actionText?: string;
   attachmentUrl?: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export interface ArticleItem {
   id: string;
   title: string;
-  category: string; // 'স্বাস্থ্য বার্তা' | 'রক্তদান সচেতনতা' | 'স্বেচ্ছাসেবী অভিজ্ঞতা' | 'থ্যালাসেমিয়া ও সেবা'
-  excerpt: string;
+  category: string; // 'স্বাস্থ্য বার্তা' | 'রক্তদান সচেতনতা' | 'স্বেচ্ছাসেবী অভিজ্ঞতা' | 'থ্যালাসেমিয়া ও সেবা' | 'facts' | string
+  excerpt?: string;
   content: string;
-  author: string;
+  author?: string;
+  authorName?: string;
   authorRole?: string;
   imageUrl?: string;
+  coverImageUrl?: string;
   youtubeUrl?: string; // ইউটিউব ভিডিও লিংক
-  date: string;
+  date?: string;
+  publishedDate?: string;
   readTime?: string;
   tags?: string[];
   viewsCount?: number;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export interface HomeSliderItem {
@@ -227,10 +241,13 @@ export interface HomeSliderItem {
   title: string;
   subtitle?: string;
   badge?: string;
+  badgeText?: string;
   imageUrl: string;
   linkPage?: string;
+  buttonLink?: string;
   linkText?: string;
-  order: number;
+  buttonText?: string;
+  order?: number;
   isActive: boolean;
 }
 

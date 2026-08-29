@@ -11,13 +11,21 @@ import {
   Sparkles,
   PhoneCall
 } from 'lucide-react';
+import { SiteConfig } from '../../types';
+import { storageService } from '../../services/storageService';
 
 interface AboutPageProps {
   setCurrentPage: (page: string) => void;
   onOpenEmergencyModal: () => void;
+  siteConfig?: SiteConfig;
 }
 
-export const AboutPage: React.FC<AboutPageProps> = ({ setCurrentPage, onOpenEmergencyModal }) => {
+export const AboutPage: React.FC<AboutPageProps> = ({ 
+  setCurrentPage, 
+  onOpenEmergencyModal,
+  siteConfig: propConfig 
+}) => {
+  const config = propConfig || storageService.getSiteConfig();
   const faqs = [
     {
       q: 'কত দিন পর পর রক্তদান করা যায়?',
@@ -44,13 +52,13 @@ export const AboutPage: React.FC<AboutPageProps> = ({ setCurrentPage, onOpenEmer
         <div className="max-w-3xl space-y-4 relative z-10">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-400 text-stone-950 font-bold text-xs uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>আমাদের লক্ষ্য ও দৃষ্টিভঙ্গি</span>
+            <span>{config.aboutSectionTitle || 'আমাদের লক্ষ্য ও দৃষ্টিভঙ্গি'}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-bold tracking-tight leading-tight">
-            একটি ফোঁটা রক্ত, বাঁচায় হাজারো হাসিমুখ
+            {config.aboutSectionSubtitle || 'একটি ফোঁটা রক্ত, বাঁচায় হাজারো হাসিমুখ'}
           </h1>
           <p className="text-red-100 text-sm sm:text-base leading-relaxed">
-            "লাইফসেভার ব্লাড ব্যাংক" নীলফামারী জেলার প্রতিটি উপজেলায় মুমূর্ষু রোগীদের কাছে সঠিক সময়ে নিরাপদ রক্ত পৌঁছে দেওয়ার এক সুসংগঠিত স্বেচ্ছাসেবী অঙ্গীকার।
+            {config.aboutStoryText || `"${config.siteName}" নীলফামারী জেলার প্রতিটি উপজেলায় মুমূর্ষু রোগীদের কাছে সঠিক সময়ে নিরাপদ রক্ত পৌঁছে দেওয়ার এক সুসংগঠিত স্বেচ্ছাসেবী অঙ্গীকার।`}
           </p>
         </div>
       </div>

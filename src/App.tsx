@@ -64,6 +64,22 @@ export default function App() {
     reloadData();
   };
 
+  // Dedicated Isolated Admin Panel Interface
+  if (currentPage === 'admin' && currentUser && currentUser.role === 'admin') {
+    return (
+      <div className="min-h-screen bg-stone-100 text-stone-900 font-serif selection:bg-[#B71C1C] selection:text-white">
+        <AdminDashboardPage
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onRefresh={reloadData}
+          setCurrentPage={setCurrentPage}
+          siteConfig={siteConfig}
+          onUpdateSiteConfig={reloadData}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-stone-100 text-stone-900 font-serif selection:bg-red-500 selection:text-white">
       {/* Top Navbar */}
@@ -105,6 +121,7 @@ export default function App() {
 
         {(currentPage === 'notice' || currentPage === 'notices') && (
           <NoticePage
+            siteConfig={siteConfig}
             setCurrentPage={setCurrentPage}
             onOpenEmergencyModal={() => setIsEmergencyModalOpen(true)}
           />
@@ -164,37 +181,27 @@ export default function App() {
         )}
 
         {currentPage === 'admin' && (
-          currentUser && currentUser.role === 'admin' ? (
-            <AdminDashboardPage
-              currentUser={currentUser}
-              onLogout={handleLogout}
-              onRefresh={reloadData}
-              setCurrentPage={setCurrentPage}
-              siteConfig={siteConfig}
-              onUpdateSiteConfig={reloadData}
-            />
-          ) : (
-            <div className="max-w-md mx-auto my-16 p-8 bg-white rounded-3xl text-center shadow-lg border border-red-200 space-y-4">
-              <div className="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
-                <Droplet className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-bold text-stone-900">অ্যাডমিন এক্সেস প্রয়োজন</h3>
-              <p className="text-xs text-stone-500">
-                এই পেজে প্রবেশের জন্য অ্যাডমিন একাউন্টে লগইন করুন (admin@blood.com / Admin@123)।
-              </p>
-              <button
-                onClick={() => setCurrentPage('login')}
-                className="px-6 py-2.5 bg-[#B71C1C] text-white rounded-xl text-xs font-bold"
-              >
-                লগইন পেজে যান
-              </button>
+          <div className="max-w-md mx-auto my-16 p-8 bg-white rounded-3xl text-center shadow-lg border border-red-200 space-y-4">
+            <div className="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
+              <Droplet className="w-8 h-8" />
             </div>
-          )
+            <h3 className="text-xl font-bold text-stone-900">অ্যাডমিন এক্সেস প্রয়োজন</h3>
+            <p className="text-xs text-stone-500">
+              এই পেজে প্রবেশের জন্য অ্যাডমিন একাউন্টে লগইন করুন (admin@blood.com / Admin@123)।
+            </p>
+            <button
+              onClick={() => setCurrentPage('login')}
+              className="px-6 py-2.5 bg-[#B71C1C] text-white rounded-xl text-xs font-bold"
+            >
+              লগইন পেজে যান
+            </button>
+          </div>
         )}
 
         {currentPage === 'about' && (
           <AboutPage
             setCurrentPage={setCurrentPage}
+            siteConfig={siteConfig}
             onOpenEmergencyModal={() => setIsEmergencyModalOpen(true)}
           />
         )}
@@ -224,6 +231,7 @@ export default function App() {
 
       {/* Footer */}
       <Footer
+        siteConfig={siteConfig}
         setCurrentPage={setCurrentPage}
         onOpenEmergencyModal={() => setIsEmergencyModalOpen(true)}
       />

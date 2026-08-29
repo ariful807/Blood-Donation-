@@ -1,8 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SiteConfig } from '../../types';
 import { storageService } from '../../services/storageService';
 import { formatDriveImageUrl } from '../../utils/imageUtils';
-import { Save, Sparkles, Image, CheckCircle, RefreshCw, Layers, Phone, Mail, MapPin, Globe } from 'lucide-react';
+import { 
+  Save, 
+  Sparkles, 
+  Image as ImageIcon, 
+  CheckCircle, 
+  RefreshCw, 
+  Layers, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Globe, 
+  Info,
+  Droplet,
+  FileText,
+  ShieldAlert
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface SiteCustomizerTabProps {
@@ -13,22 +28,71 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
   const [config, setConfig] = useState<SiteConfig>(() => storageService.getSiteConfig());
   const [savedNotice, setSavedNotice] = useState(false);
 
+  // Sync state if storage changes
+  useEffect(() => {
+    setConfig(storageService.getSiteConfig());
+  }, []);
+
   const handleChange = (field: keyof SiteConfig, value: string) => {
-    setConfig(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setConfig(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+      
+      // Auto-sync dual-named aliases
+      if (field === 'contactPhone') {
+        updated.emergencyPhone = value;
+      } else if (field === 'emergencyPhone') {
+        updated.contactPhone = value;
+      }
+
+      if (field === 'contactEmail') {
+        updated.emergencyEmail = value;
+      } else if (field === 'emergencyEmail') {
+        updated.contactEmail = value;
+      }
+
+      if (field === 'donorsSectionTitle') {
+        updated.donorsDirectoryTitle = value;
+      } else if (field === 'donorsDirectoryTitle') {
+        updated.donorsSectionTitle = value;
+      }
+
+      if (field === 'donorsSectionSubtitle') {
+        updated.donorsDirectorySubtitle = value;
+      } else if (field === 'donorsDirectorySubtitle') {
+        updated.donorsSectionSubtitle = value;
+      }
+
+      return updated;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    storageService.updateSiteConfig(config);
+    const cleanConfig: SiteConfig = {
+      ...config,
+      contactPhone: config.contactPhone || config.emergencyPhone,
+      emergencyPhone: config.contactPhone || config.emergencyPhone,
+      contactEmail: config.contactEmail || config.emergencyEmail,
+      emergencyEmail: config.contactEmail || config.emergencyEmail,
+      donorsSectionTitle: config.donorsSectionTitle || config.donorsDirectoryTitle,
+      donorsDirectoryTitle: config.donorsSectionTitle || config.donorsDirectoryTitle,
+      donorsSectionSubtitle: config.donorsSectionSubtitle || config.donorsDirectorySubtitle,
+      donorsDirectorySubtitle: config.donorsSectionSubtitle || config.donorsDirectorySubtitle,
+    };
+
+    storageService.updateSiteConfig(cleanConfig);
+    setConfig(cleanConfig);
     setSavedNotice(true);
     onUpdated();
+    
     try {
       confetti({ particleCount: 50, spread: 60 });
     } catch {}
-    setTimeout(() => setSavedNotice(false), 3000);
+    
+    setTimeout(() => setSavedNotice(false), 3500);
   };
 
   const handleReset = () => {
@@ -36,6 +100,8 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
       const reset = storageService.resetSiteConfig();
       setConfig(reset);
       onUpdated();
+      setSavedNotice(true);
+      setTimeout(() => setSavedNotice(false), 3000);
     }
   };
 
@@ -63,7 +129,7 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
           <button
             type="button"
             onClick={handleReset}
-            className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5"
+            className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>রিসেট ডিফল্ট</span>
@@ -72,7 +138,7 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
       </div>
 
       {savedNotice && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-bold flex items-center space-x-2 animate-fadeIn">
+        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-bold flex items-center space-x-2 animate-fadeIn shadow-xs">
           <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
           <span>সকল তথ্য সফলভাবে সংরক্ষিত ও ওয়েবসাইটে তাৎক্ষণিক হালনাগাদ করা হয়েছে!</span>
         </div>
@@ -89,7 +155,7 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-stone-700 mb-1">
-                ওয়েবসাইটের নাম (Site Name) *
+                ওয়েবসাইটের নাম (বাংলা) *
               </label>
               <input
                 type="text"
@@ -103,16 +169,29 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
 
             <div>
               <label className="block text-xs font-bold text-stone-700 mb-1">
-                ওয়েবসাইটের স্লোগান (Slogan)
+                ওয়েবসাইটের নাম (English Name)
               </label>
               <input
                 type="text"
-                value={config.siteSlogan || ''}
-                onChange={(e) => handleChange('siteSlogan', e.target.value)}
-                placeholder="যেমন: জীবন বাঁচান, রক্ত দিন • নীলফামারী জেলা শাখা"
-                className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm text-stone-900 focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+                value={config.siteNameEn || ''}
+                onChange={(e) => handleChange('siteNameEn', e.target.value)}
+                placeholder="LifeSaver Blood Bank"
+                className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm font-bold text-stone-900 focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-stone-700 mb-1">
+              ওয়েবসাইটের স্লোগান (Slogan)
+            </label>
+            <input
+              type="text"
+              value={config.siteSlogan || ''}
+              onChange={(e) => handleChange('siteSlogan', e.target.value)}
+              placeholder="যেমন: জীবন বাঁচান, রক্ত দিন • নীলফামারী জেলা শাখা"
+              className="w-full px-3.5 py-2.5 bg-white border border-stone-300 rounded-xl text-xs sm:text-sm text-stone-900 focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+            />
           </div>
 
           <div>
@@ -152,10 +231,24 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
               </label>
               <input
                 type="text"
-                value={config.contactPhone || ''}
+                value={config.contactPhone || config.emergencyPhone || ''}
                 onChange={(e) => handleChange('contactPhone', e.target.value)}
                 placeholder="+880 1711-000000"
-                className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900"
+                className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900 font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-stone-700 mb-1 flex items-center space-x-1">
+                <Phone className="w-3.5 h-3.5 text-stone-500" />
+                <span>বিকল্প ফোন নম্বর</span>
+              </label>
+              <input
+                type="text"
+                value={config.emergencyPhoneAlt || ''}
+                onChange={(e) => handleChange('emergencyPhoneAlt', e.target.value)}
+                placeholder="+880 1811-000000"
+                className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900 font-mono"
               />
             </div>
 
@@ -166,26 +259,26 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
               </label>
               <input
                 type="email"
-                value={config.contactEmail || ''}
+                value={config.contactEmail || config.emergencyEmail || ''}
                 onChange={(e) => handleChange('contactEmail', e.target.value)}
                 placeholder="contact@nilphamariblood.org"
                 className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900"
               />
             </div>
+          </div>
 
-            <div>
-              <label className="block text-xs font-bold text-stone-700 mb-1 flex items-center space-x-1">
-                <MapPin className="w-3.5 h-3.5 text-stone-500" />
-                <span>অফিসের ঠিকানা</span>
-              </label>
-              <input
-                type="text"
-                value={config.officeAddress || ''}
-                onChange={(e) => handleChange('officeAddress', e.target.value)}
-                placeholder="নীলফামারী সদর, নীলফামারী"
-                className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-bold text-stone-700 mb-1 flex items-center space-x-1">
+              <MapPin className="w-3.5 h-3.5 text-stone-500" />
+              <span>অফিসের ঠিকানা</span>
+            </label>
+            <input
+              type="text"
+              value={config.officeAddress || ''}
+              onChange={(e) => handleChange('officeAddress', e.target.value)}
+              placeholder="নীলফামারী সদর, নীলফামারী"
+              className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900"
+            />
           </div>
         </div>
 
@@ -217,7 +310,7 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
                 type="text"
                 value={config.heroTitle || ''}
                 onChange={(e) => handleChange('heroTitle', e.target.value)}
-                className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900"
+                className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900 font-bold"
               />
             </div>
           </div>
@@ -239,14 +332,15 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
         <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200 space-y-5">
           <h3 className="text-base font-bold text-stone-900 flex items-center space-x-2 border-b border-stone-200/80 pb-2.5">
             <Layers className="w-4 h-4 text-red-600" />
-            <span>৩. অন্যান্য সকল সেকশনের শিরোনাম ও বিবরণ</span>
+            <span>৩. হোম পেজ ও অন্যান্য সেকশনের শিরোনাম ও বিবরণ</span>
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Urgent Requests Section */}
             <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
-              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider">
-                জরুরি রক্তের আবেদন সেকশন
+              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider flex items-center space-x-1.5">
+                <Droplet className="w-3.5 h-3.5" />
+                <span>জরুরি রক্তের আবেদন সেকশন</span>
               </h4>
               <div>
                 <label className="block text-[11px] font-bold text-stone-700 mb-1">শিরোনাম</label>
@@ -270,14 +364,15 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
 
             {/* Donors Directory Section */}
             <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
-              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider">
-                ডোনার ডিরেক্টরি সেকশন
+              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider flex items-center space-x-1.5">
+                <Globe className="w-3.5 h-3.5" />
+                <span>ডোনার ডিরেক্টরি সেকশন</span>
               </h4>
               <div>
                 <label className="block text-[11px] font-bold text-stone-700 mb-1">শিরোনাম</label>
                 <input
                   type="text"
-                  value={config.donorsSectionTitle || ''}
+                  value={config.donorsSectionTitle || config.donorsDirectoryTitle || ''}
                   onChange={(e) => handleChange('donorsSectionTitle', e.target.value)}
                   className="w-full px-3 py-1.5 bg-stone-50 border border-stone-300 rounded-lg text-xs"
                 />
@@ -286,8 +381,34 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
                 <label className="block text-[11px] font-bold text-stone-700 mb-1">উপ-শিরোনাম</label>
                 <input
                   type="text"
-                  value={config.donorsSectionSubtitle || ''}
+                  value={config.donorsSectionSubtitle || config.donorsDirectorySubtitle || ''}
                   onChange={(e) => handleChange('donorsSectionSubtitle', e.target.value)}
+                  className="w-full px-3 py-1.5 bg-stone-50 border border-stone-300 rounded-lg text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Blood Stock Section */}
+            <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
+              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider flex items-center space-x-1.5">
+                <Droplet className="w-3.5 h-3.5 text-sky-600" />
+                <span>ব্লাড স্টক সেকশন</span>
+              </h4>
+              <div>
+                <label className="block text-[11px] font-bold text-stone-700 mb-1">শিরোনাম</label>
+                <input
+                  type="text"
+                  value={config.bloodStockTitle || ''}
+                  onChange={(e) => handleChange('bloodStockTitle', e.target.value)}
+                  className="w-full px-3 py-1.5 bg-stone-50 border border-stone-300 rounded-lg text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-stone-700 mb-1">উপ-শিরোনাম</label>
+                <input
+                  type="text"
+                  value={config.bloodStockSubtitle || ''}
+                  onChange={(e) => handleChange('bloodStockSubtitle', e.target.value)}
                   className="w-full px-3 py-1.5 bg-stone-50 border border-stone-300 rounded-lg text-xs"
                 />
               </div>
@@ -295,8 +416,9 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
 
             {/* Notice Board Section */}
             <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
-              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider">
-                নোটিস বোর্ড সেকশন
+              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider flex items-center space-x-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>নোটিস বোর্ড সেকশন</span>
               </h4>
               <div>
                 <label className="block text-[11px] font-bold text-stone-700 mb-1">শিরোনাম</label>
@@ -320,8 +442,9 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
 
             {/* Blog & Articles Section */}
             <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
-              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider">
-                ব্লগ ও স্বাস্থ্য পরামর্শ সেকশন
+              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider flex items-center space-x-1.5">
+                <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                <span>ব্লগ ও স্বাস্থ্য পরামর্শ সেকশন</span>
               </h4>
               <div>
                 <label className="block text-[11px] font-bold text-stone-700 mb-1">শিরোনাম</label>
@@ -345,8 +468,9 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
 
             {/* Gallery Section */}
             <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
-              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider">
-                গ্যালারি ও স্মৃতিশালা সেকশন
+              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider flex items-center space-x-1.5">
+                <ImageIcon className="w-3.5 h-3.5 text-sky-600" />
+                <span>গ্যালারি ও স্মৃতিশালা সেকশন</span>
               </h4>
               <div>
                 <label className="block text-[11px] font-bold text-stone-700 mb-1">শিরোনাম</label>
@@ -370,8 +494,9 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
 
             {/* Apply & Volunteer Section */}
             <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
-              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider">
-                আবেদন ও ভলান্টিয়ার সেকশন
+              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider flex items-center space-x-1.5">
+                <Info className="w-3.5 h-3.5 text-purple-600" />
+                <span>আবেদন ও ভলান্টিয়ার সেকশন</span>
               </h4>
               <div>
                 <label className="block text-[11px] font-bold text-stone-700 mb-1">শিরোনাম</label>
@@ -392,6 +517,110 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
                 />
               </div>
             </div>
+
+            {/* Contact Section */}
+            <div className="p-4 rounded-xl bg-white border border-stone-200 space-y-2">
+              <h4 className="text-xs font-bold text-[#B71C1C] uppercase tracking-wider flex items-center space-x-1.5">
+                <Phone className="w-3.5 h-3.5 text-amber-600" />
+                <span>যোগাযোগ সেকশন</span>
+              </h4>
+              <div>
+                <label className="block text-[11px] font-bold text-stone-700 mb-1">শিরোনাম</label>
+                <input
+                  type="text"
+                  value={config.contactSectionTitle || ''}
+                  onChange={(e) => handleChange('contactSectionTitle', e.target.value)}
+                  className="w-full px-3 py-1.5 bg-stone-50 border border-stone-300 rounded-lg text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-stone-700 mb-1">উপ-শিরোনাম</label>
+                <input
+                  type="text"
+                  value={config.contactSectionSubtitle || ''}
+                  onChange={(e) => handleChange('contactSectionSubtitle', e.target.value)}
+                  className="w-full px-3 py-1.5 bg-stone-50 border border-stone-300 rounded-lg text-xs"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. About Us & Story Section */}
+        <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200 space-y-4">
+          <h3 className="text-base font-bold text-stone-900 flex items-center space-x-2 border-b border-stone-200/80 pb-2.5">
+            <Info className="w-4 h-4 text-emerald-600" />
+            <span>৪. আমাদের সম্পর্কে ও উদ্দেশ্য (About Us Section)</span>
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-stone-700 mb-1">
+                সেকশন শিরোনাম
+              </label>
+              <input
+                type="text"
+                value={config.aboutSectionTitle || ''}
+                onChange={(e) => handleChange('aboutSectionTitle', e.target.value)}
+                className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-stone-700 mb-1">
+                সেকশন উপ-শিরোনাম
+              </label>
+              <input
+                type="text"
+                value={config.aboutSectionSubtitle || ''}
+                onChange={(e) => handleChange('aboutSectionSubtitle', e.target.value)}
+                className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-stone-700 mb-1">
+              সংগঠনের গল্প ও বিস্তারিত বিবরণ
+            </label>
+            <textarea
+              rows={3}
+              value={config.aboutStoryText || ''}
+              onChange={(e) => handleChange('aboutStoryText', e.target.value)}
+              className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900"
+            />
+          </div>
+        </div>
+
+        {/* 5. Footer & Copyright */}
+        <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200 space-y-4">
+          <h3 className="text-base font-bold text-stone-900 flex items-center space-x-2 border-b border-stone-200/80 pb-2.5">
+            <FileText className="w-4 h-4 text-stone-600" />
+            <span>৫. ফুটার ও কপিরাইট টেক্সট</span>
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-stone-700 mb-1">
+                ফুটার বিবরণ টেক্সট
+              </label>
+              <input
+                type="text"
+                value={config.footerText || ''}
+                onChange={(e) => handleChange('footerText', e.target.value)}
+                className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-stone-700 mb-1">
+                কপিরাইট নোটিশ
+              </label>
+              <input
+                type="text"
+                value={config.copyrightText || ''}
+                onChange={(e) => handleChange('copyrightText', e.target.value)}
+                className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-xl text-xs text-stone-900"
+              />
+            </div>
           </div>
         </div>
 
@@ -399,7 +628,7 @@ export const SiteCustomizerTab: React.FC<SiteCustomizerTabProps> = ({ onUpdated 
         <div className="pt-2 flex items-center justify-end space-x-3">
           <button
             type="submit"
-            className="px-8 py-3.5 bg-[#B71C1C] hover:bg-[#8E0000] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center space-x-2"
+            className="px-8 py-3.5 bg-[#B71C1C] hover:bg-[#8E0000] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer"
           >
             <Save className="w-4 h-4" />
             <span>সকল পরিবর্তন সংরক্ষণ করুন</span>
